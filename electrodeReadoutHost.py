@@ -15,9 +15,9 @@ import helpers
 import plotters
 import serial
 
-hboardBaudRate = 38400
+#hboardBaudRate = 38400
 # Start humidity serial with matching baud rate in HumidityControl_V2.3_Brian
-humidityser = serial.Serial('COM8', hboardBaudRate, timeout = 0.9)
+#humidityser = serial.Serial('COM8', hboardBaudRate, timeout = 0.9)
 
 ##### Current Reading Settings #####
 deviceID = 'dev3275'
@@ -33,10 +33,10 @@ TIMEOUT_MS = 500
 
 # Define destination of the file
 #subDirectoryData = r"C:\Users\DaraioLab - Pectin\Desktop\BrianAhn\readout_Electrode\P3A\20260529_Exp0025\ImpedData"  #Folder where the data are saved
-subDirectoryData = r"C:\Users\DaraioLab - Pectin\Desktop\BrianAhn\readout_Electrode\WVTR\20260706"
+subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
 #fileIDData = r"20251209_P3APixel_65CBake_P3A1CaCl1_2000Hz_100mV_PostCycling" #### change here file name
 #fileIDData = r"20260626_300mMolCaCl2_1HzBW_1kHz_ID2_1Day50CCure_LPIBCoating_PostCure_TCyc_Cont10"
-fileIDData = r"20260707_ChromologicTest"
+fileIDData = r"20260728_Test"
 #fileIDData = r"20260224_NewFanTest"
 # Connect to the LabOne Data Server
 session = zhinst.toolkit.Session("localhost", 8004)
@@ -83,7 +83,7 @@ beginTime_DeviceInternal = (device.status.time()/instrClockPeriod) # Time that w
 
 # List where we will store all our data for plotting
 IAAvgData = {key: [] for key in headerList}
-humidityser.write(b"s\n") # This lets the arduino know that we are starting.
+#humidityser.write(b"s\n") # This lets the arduino know that we are starting.
 
 while True:
     currentTime = time.time()
@@ -124,12 +124,11 @@ while True:
 # ============================ revamped code starts here =========================
 
 def pollAndAverageImpedance(recordingTimeS, timeoutMs):
-    """
-    Subscribes to the MFIA impedance node, polls for recordingTimeS seconds,
-    unsubscribes, and averages recorded data into a single sample.
+    #Subscribes to the MFIA impedance node, polls for recordingTimeS seconds,
+    #unsubscribes, and averages recorded data into a single sample.
 
-    Returns a dict: {'time', 'zreal', 'zimag', 'zmag', 'zphase', 'frequency'}
-    """
+    #Returns a dict: {'time', 'zreal', 'zimag', 'zmag', 'zphase', 'frequency'}
+    
     daq.flush()
     daq.subscribe(impedanceNode)  # Subscribe to data node
     daq.sync()
