@@ -19,6 +19,7 @@ hboardBaudRate = 38400
 # Start humidity serial with matching baud rate in HumidityControl_V2.3_Brian
 humidityser = serial.Serial('COM8', hboardBaudRate, timeout = 0.9)
 
+
 ##### Current Reading Settings #####
 deviceID = 'dev3275'
 amplitudeExct = 0.1      # Amplitude of the excitation sine in V
@@ -119,62 +120,3 @@ while True:
     # Runs more or less continuously
     #plt.pause(0.01)
     time.sleep(0.005) # Don't want to set CPU at 100%
-
-"""
-# ============================ revamped code starts here =========================
-
-def pollAndAverageImpedance(recordingTimeS, timeoutMs):
-    """
-    Subscribes to the MFIA impedance node, polls for recordingTimeS seconds,
-    unsubscribes, and averages recorded data into a single sample.
-
-    Returns a dict: {'time', 'zreal', 'zimag', 'zmag', 'zphase', 'frequency'}
-    """
-    daq.flush()
-    daq.subscribe(impedanceNode)  # Subscribe to data node
-    daq.sync()
-    IARawData = daq.poll(recordingTimeS, timeoutMs, 0, True)[impedanceNode]
-    daq.unsubscribe("*")  # Unsubscribe, so data doesn't build up in between.
-
-    sample = {}
-    for key in headerList_IARaw:
-        values = IARawData[key]
-        if key == 'timestamp':
-            sample['time'] = (float(np.mean(values)) / instrClockPeriod) - beginTime_DeviceInternal
-        if key == 'z':  # find the average zmag and zphase first
-            sample['zmag'] = np.mean(np.abs(values))
-            sample['zphase'] = np.mean(np.angle(values))
-            sample['zreal'] = np.mean(np.real(values))
-            sample['zimag'] = np.mean(np.imag(values))
-        if key == 'frequency':
-            sample['frequency'] = np.mean(values)
-
-    return sample
-
-
-def runElectrodeSweep():
-
-    while True:
-        line = teensySerial.readline()
-        if not line:
-            continue
-
-        line = line.decode(errors='ignore').strip()
-        if not line.startswith("PAIR"):
-            continue
-
-        parts = line.split(",")
-        if len(parts) != 3:
-            continue
-        chA, chB = int(parts[1]), int(parts[2])
-
-        sample = pollAndAverageImpedance(RECORDING_TIME_S, TIMEOUT_MS)
-        sample['chA'] = chA
-        sample['chB'] = chB
-        with tempLock:
-            sample['temperature'] = latestTemp
-
-        helpers.recordData(outputFile, sample, headerList)
-        teensySerial.write(b"DONE\n")
-
-"""
