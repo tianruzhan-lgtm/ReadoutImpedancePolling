@@ -72,8 +72,6 @@ beginTime_DeviceInternal = (device.status.time()/instrClockPeriod) # Time that w
 # List where we will store all our data for plotting
 IAAvgData = {key: [] for key in headerList}
 
-runElectrodeSweep()
-
 
 def pollAndAverageImpedance(recordingTimeS, timeoutMs):
 
@@ -126,3 +124,5 @@ def runElectrodeSweep():
 
         helpers.recordData(outputFile, sample, headerList)
         readoutSerial.write(b"DONE\n")
+
+runElectrodeSweep()

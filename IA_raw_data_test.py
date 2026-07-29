@@ -66,7 +66,7 @@ print(timestamp/instrClockPeriod)
 
 # Creates the file - or either overwrites, or prompts user for new file.
 headerList_IARaw = ["timestamp", "z", "frequency"]
-headerList = ["time", "zreal", "zimag", "zmag", "zphase", "frequency", "temperature", "humidity"]
+headerList = ["time", "zreal", "zimag", "zmag", "zphase", "frequency"]
 outputFile = helpers.initializeData(subDirectoryData, fileIDData, headerList)
 
 # Lock in Amplifier Initializing?
@@ -76,14 +76,53 @@ outputFile = helpers.initializeData(subDirectoryData, fileIDData, headerList)
 
 beginTime_DeviceInternal = (device.status.time()/instrClockPeriod) # Time that we began polling, in seconds, according to internal clock
 
-# List where we will store all our data for plotting
+# List where we will store all our data
 IARawSamples = {key: [] for key in headerList}
+recordedIdx = 0  # tracks how many rows have already been written to file
 #humidityser.write(b"s\n") # This lets the arduino know that we are starting.
 
 # Subscribe once, then keep polling continuously without unsubscribing in between
 daq.flush()
 daq.subscribe(impedanceNode)
 daq.sync()
+
+def recordAllRawData(outputFile, IAAvgData, headerList, startIdx=0):
+    """
+    Appends every new row (from startIdx to the end of each list) to outputFile.
+    Returns the new startIdx to pass in next call, so already-written rows
+    aren't duplicated.
+    """
+    precision = {
+        "time": 10,
+        "temperature": 4,
+        "humidity": 4
+    }
+
+    numRows = len(IAAvgData[headerList[0]])
+    lines = []
+    for i in range(startIdx, numRows):
+        rowBuffer = []
+        for key in headerList:
+            values = IAAvgData[key]
+            if i >= len(values):
+                val = ""  # Handles keys with fewer entries (e.g. temperature/humidity)
+            else:
+                val = values[i]
+
+            if isinstance(val, (int, float)):
+                sigfigs = precision.get(key, 6)
+                val_str = f"{val:.{sigfigs}g}"
+            else:
+                val_str = str(val)
+
+            rowBuffer.append(val_str)
+        lines.append("\t".join(rowBuffer))
+
+    if lines:
+        with open(outputFile, "a") as f:
+            f.write("\n".join(lines) + "\n")
+
+    return numRows
 
 try:
     while True:
@@ -102,6 +141,6 @@ try:
             IARawSamples['zphase'].append(np.angle(zValues[i]))
             IARawSamples['frequency'].append(freqValues[i])
 
-        helpers.recordData(outputFile, IARawSamples, headerList)
+        recordedIdx = recordAllRawData(outputFile, IARawSamples, headerList, recordedIdx)
 finally:
     daq.unsubscribe("*")
