@@ -28,7 +28,7 @@ demodRate = 100e3           ###DO NOT CHANGE
 samplingRate = 0.001        ###DO NOT CHANGE
 # TODO: currently, the amplitude, frequency are not doing anything because we are no longer using the MFIA obj. Implement.
 
-RECORDING_TIME_S = 0.1
+RECORDING_TIME_S = 0.11
 TIMEOUT_MS = 500
 
 # Define destination of the file
