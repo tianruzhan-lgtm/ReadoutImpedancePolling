@@ -14,18 +14,14 @@ import helpers
 import plotters
 import serial
 
-# ---- MFIA polling constants ----
-POLL_INTERVAL_S = 0.1        # how often to poll while a pair is active
-TIMEOUT_MS = 500              # confirmation/poll timeout
-
 # ---- Electrode readout serial setup ----
-readoutPort = 'COM3'
+readoutPort = 'COM5'
 readoutBaudRate = 115200
 readoutSerial = serial.Serial(readoutPort, readoutBaudRate, timeout=0.1)
 
 # ---- File destination ----
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
-fileIDData = r"20260728_Test"
+fileIDData = r"20260728_ManualElectrodeReadout"
 
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z", "frequency"]
@@ -39,6 +35,11 @@ frequencyExct = 1000
 currentRange = 1e-4
 demodRate = 100e3
 samplingRate = 0.001
+
+# ---- Polling constants ----
+POLL_INTERVAL_S = 0.1        # how often to poll in seconds
+RECORDING_TIME_S = 0.05      # recording time during poll session
+TIMEOUT_MS = 500
 
 # ---- Connect to LabOne Data Server ----
 session = zhinst.toolkit.Session("localhost", 8004)
@@ -63,37 +64,13 @@ instrClockPeriod = 60000000
 print(timestamp / instrClockPeriod)
 
 # ---- Begin polling impedance data ----
-last_Polled = time.time()
 time.sleep(1.005)
 beginTime_DeviceInternal = (device.status.time() / instrClockPeriod)
 
 IAAvgData = {key: [] for key in headerList}
 
 
-def pollAndAverageImpedance(recordingTimeS, timeoutMs):
-    daq.flush()
-    daq.subscribe(impedanceNode)
-    daq.sync()
-    IARawData = daq.poll(recordingTimeS, timeoutMs, 0, True)[impedanceNode]
-    daq.unsubscribe("*")
-
-    sample = {}
-    for key in headerList_IARaw:
-        values = IARawData[key]
-        if key == 'timestamp':
-            sample['time'] = (float(np.mean(values)) / instrClockPeriod) - beginTime_DeviceInternal
-        if key == 'z':
-            sample['zmag'] = np.mean(np.abs(values))
-            sample['zphase'] = np.mean(np.angle(values))
-            sample['zreal'] = np.mean(np.real(values))
-            sample['zimag'] = np.mean(np.imag(values))
-        if key == 'frequency':
-            sample['frequency'] = np.mean(values)
-
-    return sample
-
-
-def sendPair(chA, chB):
+def sendPairAndWaitForConfirmation(chA, chB):
     command = f"{chA},{chB}\n"
     readoutSerial.write(command.encode())
 
@@ -125,20 +102,46 @@ stopPollingEvent = threading.Event()
 
 
 def continuousPollLoop(chA, chB, stopEvent):
+    last_Polled = time.time()
+
     while not stopEvent.is_set():
-        sample = pollAndAverageImpedance(POLL_INTERVAL_S, TIMEOUT_MS)
-        sample['chA'] = chA
-        sample['chB'] = chB
+        currentTime = time.time()
 
-        helpers.recordData(outputFile, sample, headerList)
+        if currentTime - last_Polled >= POLL_INTERVAL_S:
+            last_Polled += POLL_INTERVAL_S
 
-        print(f"[{chA},{chB}] zmag={sample['zmag']:.2f}")
+            daq.flush()
+            daq.subscribe(impedanceNode)
+            daq.sync()
+            IARawData = daq.poll(RECORDING_TIME_S, TIMEOUT_MS, 0, True)[impedanceNode]
+            daq.unsubscribe("*")
+
+            for key in headerList_IARaw:
+                values = IARawData[key]
+                if key == 'timestamp':
+                    IAAvgData['time'].append((float(np.mean(values)) / instrClockPeriod) - beginTime_DeviceInternal)
+                if key == 'z':
+                    IAAvgData['zmag'].append(np.mean(np.abs(values)))
+                    IAAvgData['zphase'].append(np.mean(np.angle(values)))
+                    IAAvgData['zreal'].append(np.mean(np.real(values)))
+                    IAAvgData['zimag'].append(np.mean(np.imag(values)))
+                if key == 'frequency':
+                    IAAvgData['frequency'].append(np.mean(values))
+
+            IAAvgData['chA'].append(chA)
+            IAAvgData['chB'].append(chB)
+
+            helpers.recordData(outputFile, IAAvgData, headerList)
+
+            print(f"[{chA},{chB}] zmag={IAAvgData['zmag'][-1]:.2f}")
+
+        time.sleep(0.005)
 
 
-def startPolling(chA, chB):
+def startPollingForPair(chA, chB):
     global pollingThread, stopPollingEvent
 
-    stopActivePolling()   # stop whatever was running for the previous pair, if anything
+    stopActivePolling()
 
     stopPollingEvent = threading.Event()
     pollingThread = threading.Thread(
@@ -182,14 +185,14 @@ def runInteractiveSweep():
                 print("Invalid format. Use: chA,chB")
                 continue
 
-            confirmed = sendPair(chA_requested, chB_requested)
+            confirmed = sendPairAndWaitForConfirmation(chA_requested, chB_requested)
             if confirmed is None:
                 print("Skipping — no polling started due to error/timeout")
                 continue
 
             chA, chB = confirmed
             print(f"Switched to pair ({chA}, {chB}) — polling started")
-            startPolling(chA, chB)
+            startPollingForPair(chA, chB)
 
     finally:
         stopActivePolling()
