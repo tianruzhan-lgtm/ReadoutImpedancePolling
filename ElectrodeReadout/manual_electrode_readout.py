@@ -70,7 +70,7 @@ beginTime_DeviceInternal = (device.status.time() / instrClockPeriod)
 IAAvgData = {key: [] for key in headerList}
 
 
-def sendPairAndWaitForConfirmation(chA, chB):
+def sendPair(chA, chB):
     command = f"{chA},{chB}\n"
     readoutSerial.write(command.encode())
 
@@ -138,7 +138,7 @@ def continuousPollLoop(chA, chB, stopEvent):
         time.sleep(0.005)
 
 
-def startPollingForPair(chA, chB):
+def startPolling(chA, chB):
     global pollingThread, stopPollingEvent
 
     stopActivePolling()
@@ -185,14 +185,14 @@ def runInteractiveSweep():
                 print("Invalid format. Use: chA,chB")
                 continue
 
-            confirmed = sendPairAndWaitForConfirmation(chA_requested, chB_requested)
+            confirmed = sendPair(chA_requested, chB_requested)
             if confirmed is None:
                 print("Skipping — no polling started due to error/timeout")
                 continue
 
             chA, chB = confirmed
             print(f"Switched to pair ({chA}, {chB}) — polling started")
-            startPollingForPair(chA, chB)
+            startPolling(chA, chB)
 
     finally:
         stopActivePolling()
