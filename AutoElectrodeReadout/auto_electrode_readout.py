@@ -22,7 +22,7 @@ PAIR_INCOMING_MESSAGE = "P,"
 IMPEDANCE_DONE_MESSAGE = b"D\n"
 
 # ---- MFIA polling constants ----
-RECORDING_TIME_S = 0.1
+RECORDING_TIME_S = 0.05
 TIMEOUT_MS = 500
 
 # ---- File destination ----
