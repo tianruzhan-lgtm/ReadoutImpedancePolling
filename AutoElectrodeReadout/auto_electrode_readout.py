@@ -111,6 +111,8 @@ def runElectrodeSweep():
         sample['chA'] = chA
         sample['chB'] = chB
 
+        print(f"chA={chA}, chB={chB},  zreal={sample['zreal']:.2e}")
+
         wrappedSample = {key: [sample[key]] for key in headerList}
         helpers.recordData(outputFile, wrappedSample, headerList)
 
