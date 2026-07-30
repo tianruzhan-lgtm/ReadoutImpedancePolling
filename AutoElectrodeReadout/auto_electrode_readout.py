@@ -22,7 +22,7 @@ PAIR_INCOMING_MESSAGE = "P,"
 IMPEDANCE_DONE_MESSAGE = b"D\n"
 
 # ---- MFIA polling constants ----
-RECORDING_TIME_S = 0.05
+RECORDING_TIME_S = 0.1
 TIMEOUT_MS = 500
 
 # ---- File destination ----
@@ -30,8 +30,8 @@ subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
 fileIDData = r"20260729_AutoElectrodeReadout_Test"
 
 # ---- Output file setup ----
-headerList_IARaw = ["timestamp", "z", "frequency"]
-headerList = ["time", "zreal", "zimag", "zmag", "zphase", "frequency", "chA", "chB"]
+headerList_IARaw = ["timestamp", "z"]
+headerList = ["time", "zreal", "zimag", "zmag", "zphase", "chA", "chB"]
 outputFile = helpers.initializeData(subDirectoryData, fileIDData, headerList)
 
 # ---- MFIA measurement constants ----
@@ -86,8 +86,8 @@ def pollAndAverageImpedance(recordingTimeS, timeoutMs):
             sample['zphase'] = np.mean(np.angle(values))
             sample['zreal'] = np.mean(np.real(values))
             sample['zimag'] = np.mean(np.imag(values))
-        if key == 'frequency':
-            sample['frequency'] = np.mean(values)
+        # if key == 'frequency':
+            # sample['frequency'] = np.mean(values)
 
     return sample
 

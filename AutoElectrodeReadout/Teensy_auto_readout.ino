@@ -1,7 +1,7 @@
 // ---- SYSTEM SETTINGS ----
 
 // time constants (all in microseconds)
-const unsigned long CYCLE_TARGET_TIME = 10000000;
+const unsigned long CYCLE_TARGET_TIME = 100000000;
 const unsigned long TIMEOUT_TIME = 5000000;                                    // need to set
 
 unsigned long cycleStartTime;
