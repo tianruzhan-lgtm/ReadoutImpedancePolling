@@ -1,8 +1,8 @@
 // ---- SYSTEM SETTINGS ----
 
 // time constants (all in microseconds)
-const unsigned long CYCLE_TARGET_TIME = 1000000;
-const unsigned long TIMEOUT_TIME = 10000;                                    // need to set
+const unsigned long CYCLE_TARGET_TIME = 10000000;
+const unsigned long TIMEOUT_TIME = 5000000;                                    // need to set
 
 unsigned long cycleStartTime;
 unsigned long stateTimer;
@@ -11,6 +11,7 @@ unsigned long currentTime;
 // serial message values
 const char* PAIR_INCOMING_MESSAGE = "P,";
 const char* DONE_MESSAGE = "D";
+const char* START_MESSAGE = "START";
 
 
 // ---- READOUT TEENSY SIDE ----
@@ -213,6 +214,16 @@ void setup() {
   digitalWrite(MUX_ENABLE, HIGH);
 
   setupMuxLookupTables();
+
+    // block here until START arrives
+  char incoming[SERIAL_BUF_SIZE];
+  while (true) {
+    if (readMessage(incoming, sizeof(incoming))) {
+      if (strcmp(incoming, START_MESSAGE) == 0) {
+        break;
+      }
+    }
+  }
 
   cycleStartTime = micros();
 }
