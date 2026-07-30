@@ -76,20 +76,20 @@ def pollAndAverageImpedance(recordingTimeS, timeoutMs):
     IARawData = daq.poll(recordingTimeS, timeoutMs, 0, True)[impedanceNode]
     daq.unsubscribe("*")
 
-    sample = {}
+    IAAvgData = {}
     for key in headerList_IARaw:
         values = IARawData[key]
         if key == 'timestamp':
-            sample['time'] = (float(np.mean(values)) / instrClockPeriod) - beginTime_DeviceInternal
+            IAAvgData['time'] = (float(np.mean(values)) / instrClockPeriod) - beginTime_DeviceInternal
         if key == 'z':
-            sample['zmag'] = np.mean(np.abs(values))
-            sample['zphase'] = np.mean(np.angle(values))
-            sample['zreal'] = np.mean(np.real(values))
-            sample['zimag'] = np.mean(np.imag(values))
+            IAAvgData['zmag'] = np.mean(np.abs(values))
+            IAAvgData['zphase'] = np.mean(np.angle(values))
+            IAAvgData['zreal'] = np.mean(np.real(values))
+            IAAvgData['zimag'] = np.mean(np.imag(values))
         # if key == 'frequency':
-            # sample['frequency'] = np.mean(values)
+            # IAAvgData['frequency'] = np.mean(values)
 
-    return sample
+    return IAAvgData
 
 
 def runElectrodeSweep():
@@ -107,14 +107,13 @@ def runElectrodeSweep():
             continue
         chA, chB = int(messageParts[1]), int(messageParts[2])
 
-        sample = pollAndAverageImpedance(RECORDING_TIME_S, TIMEOUT_MS)
-        sample['chA'] = chA
-        sample['chB'] = chB
+        IAAvgData = pollAndAverageImpedance(RECORDING_TIME_S, TIMEOUT_MS)
+        IAAvgData['chA'] = chA
+        IAAvgData['chB'] = chB
 
-        print(f"chA={chA}, chB={chB},  zreal={sample['zreal']:.2e}")
+        print(f"chA={chA}, chB={chB},  zreal={IAAvgData['zreal']:.2e}")
 
-        wrappedSample = {key: [sample[key]] for key in headerList}
-        helpers.recordData(outputFile, wrappedSample, headerList)
+        helpers.recordData(outputFile, IAAvgData, headerList)
 
         readoutSerial.write(IMPEDANCE_DONE_MESSAGE)
 
