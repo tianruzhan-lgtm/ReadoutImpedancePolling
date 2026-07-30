@@ -36,7 +36,7 @@ TIMEOUT_MS = 500
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
 #fileIDData = r"20251209_P3APixel_65CBake_P3A1CaCl1_2000Hz_100mV_PostCycling" #### change here file name
 #fileIDData = r"20260626_300mMolCaCl2_1HzBW_1kHz_ID2_1Day50CCure_LPIBCoating_PostCure_TCyc_Cont10"
-fileIDData = r"20260728_Test"
+fileIDData = r"20260729_1hz_raw_test"
 #fileIDData = r"20260224_NewFanTest"
 # Connect to the LabOne Data Server
 session = zhinst.toolkit.Session("localhost", 8004)
