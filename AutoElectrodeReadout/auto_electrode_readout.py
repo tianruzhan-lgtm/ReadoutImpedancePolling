@@ -14,7 +14,7 @@ import plotters
 import serial
 
 # ---- Electrode readout settings ----
-readoutPort = 'COM5'           # set to actual teensy port
+readoutPort = 'COM5'
 readoutBaudRate = 115200
 readoutSerial = serial.Serial(readoutPort, readoutBaudRate, timeout=0.1)
 
@@ -116,5 +116,7 @@ def runElectrodeSweep():
 
         readoutSerial.write(IMPEDANCE_DONE_MESSAGE)
 
+input("Press Enter to start the electrode sweep...")
+readoutSerial.write(b"START\n")
 
 runElectrodeSweep()
