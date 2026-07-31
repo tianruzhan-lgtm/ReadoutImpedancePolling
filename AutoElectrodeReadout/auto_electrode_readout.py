@@ -32,7 +32,8 @@ fileIDData = r"20260729_AutoElectrodeReadout_Test1.5"
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z"]
 headerList = ["time", "zreal", "zimag", "zmag", "zphase", "chA", "chB"]
-outputFile = helpers.initializeData(subDirectoryData, fileIDData, headerList)
+outputFilePath = helpers.initializeData(subDirectoryData, fileIDData, headerList)
+outputFileHandle = open(outputFilePath, "a")
 
 # ---- MFIA measurement constants ----
 deviceID = 'dev3275'
@@ -88,6 +89,12 @@ def pollAndAverageImpedance(recordingTimeS, timeoutMs):
 
     return sample
 
+def writeRow(fileHandle, sample, chA, chB):
+    # Writes impedance sample as a tab-separated row to the already-open file handle
+    fileHandle.write(
+        f"{sample['time']:.10g}\t{sample['zreal']:.6g}\t{sample['zimag']:.6g}\t"
+        f"{sample['zmag']:.6g}\t{sample['zphase']:.6g}\t{chA}\t{chB}\n"
+    )
 
 def runElectrodeSweep():
     while True:
@@ -110,9 +117,7 @@ def runElectrodeSweep():
 
         print(f"chA={chA}, chB={chB},  zreal={sample['zreal']:.2e}")
 
-        wrappedSample = {key: [sample[key]] for key in headerList}
-        print(wrappedSample)
-        helpers.recordData(outputFile, wrappedSample, headerList)
+        writeRow(outputFileHandle, sample, chA, chB)
 
         readoutSerial.write(IMPEDANCE_DONE_MESSAGE)
 
@@ -129,4 +134,5 @@ try:
 finally:
     # ---- always unsubscribe on exit, even if interrupted ----
     daq.unsubscribe(impedanceNode)
+    outputFileHandle.close()
     print("Unsubscribed from impedance node, exiting.")
