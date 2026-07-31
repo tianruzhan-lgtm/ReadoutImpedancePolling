@@ -22,8 +22,9 @@ PAIR_INCOMING_MESSAGE = "P,"
 IMPEDANCE_DONE_MESSAGE = b"D\n"
 
 # ---- MFIA polling constants ----
-RECORDING_TIME_S = 0.003
+RECORDING_TIME_S = 0.01
 TIMEOUT_MS = 500
+NUM_SWEEPS_DESIRED = 5
 
 # ---- File destination ----
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
@@ -88,6 +89,8 @@ def pollAverageWriteRawImpedance(recordingTimeS, timeoutMs, chA, chB):
 
 
 def runElectrodeSweep():
+    global sweepCounter
+
     while True:
         line = readoutSerial.readline()
         if not line:
@@ -105,6 +108,14 @@ def runElectrodeSweep():
         pollAverageWriteRawImpedance(RECORDING_TIME_S, TIMEOUT_MS, chA, chB)
         readoutSerial.write(IMPEDANCE_DONE_MESSAGE)
 
+        if (chA == 14) and (chB == 15):
+            sweepCounter+= 1
+            if sweepCounter == NUM_SWEEPS_DESIRED:
+                print(f"{sweepCounter} sweeps reached, ending now.")
+                break
+
+
+
 
 # ---- sweep ----
 input("Press Enter to start the electrode sweep...")
@@ -112,6 +123,7 @@ readoutSerial.write(b"START\n")
 
 daq.subscribe(impedanceNode)    # subscribe once, turn off at end
 daq.sync()
+sweepCounter = 0
 
 try:
     runElectrodeSweep()
