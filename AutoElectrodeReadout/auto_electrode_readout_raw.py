@@ -32,8 +32,7 @@ fileIDData = r"20260729_AutoElectrodeReadout_Test1.6"
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z"]
 headerList = ["time", "zreal", "zimag", "zmag", "zphase", "chA", "chB"]
-outputFilePath = helpers.initializeData(subDirectoryData, fileIDData, headerList)
-outputFileHandle = open(outputFilePath, "a")
+outputFile = helpers.initializeData(subDirectoryData, fileIDData, headerList)
 
 # ---- MFIA measurement constants ----
 deviceID = 'dev3275'
@@ -69,31 +68,24 @@ print(timestamp / instrClockPeriod)
 time.sleep(1.005)
 beginTime_DeviceInternal = (device.status.time() / instrClockPeriod)
 
-def pollAndAverageImpedance(recordingTimeS, timeoutMs):
-    daq.flush()
+def pollAverageWriteRawImpedance(recordingTimeS, timeoutMs, chA, chB):
     IARawData = daq.poll(recordingTimeS, timeoutMs, 0, True)[impedanceNode]
 
-    sample = {}
-    for key in headerList_IARaw:
-        values = IARawData[key]
-        if key == 'timestamp':
-            sample['time'] = (float(np.mean(values)) / instrClockPeriod) - beginTime_DeviceInternal
-        if key == 'z':
-            sample['zmag'] = np.mean(np.abs(values))
-            sample['zphase'] = np.mean(np.angle(values))
-            sample['zreal'] = np.mean(np.real(values))
-            sample['zimag'] = np.mean(np.imag(values))
-        # if key == 'frequency':
-            # sample['frequency'] = np.mean(values)
+    timestamps = IARawData['timestamp']
+    zValues = IARawData['z']
 
-    return sample
+    lines = []
+    for i in range(len(timestamps)):
+        t = (float(timestamps[i]) / instrClockPeriod) - beginTime_DeviceInternal
+        zreal = np.real(zValues[i])
+        zimag = np.imag(zValues[i])
+        zmag = np.abs(zValues[i])
+        zphase = np.angle(zValues[i])
+        lines.append(f"{t:.10g}\t{zreal:.6g}\t{zimag:.6g}\t{zmag:.6g}\t{zphase:.6g}\t{chA}\t{chB}")
 
-def writeRow(fileHandle, sample, chA, chB):
-    # Writes impedance sample as a tab-separated row to the already-open file handle
-    fileHandle.write(
-        f"{sample['time']:.10g}\t{sample['zreal']:.6g}\t{sample['zimag']:.6g}\t"
-        f"{sample['zmag']:.6g}\t{sample['zphase']:.6g}\t{chA}\t{chB}\n"
-    )
+    with open(outputFile, "a") as f:
+        f.writelines(f"{line}\n" for line in lines)
+
 
 def runElectrodeSweep():
     while True:
@@ -110,12 +102,7 @@ def runElectrodeSweep():
             continue
         chA, chB = int(messageParts[1]), int(messageParts[2])
 
-        sample = pollAndAverageImpedance(RECORDING_TIME_S, TIMEOUT_MS)
-        sample['chA'] = chA
-        sample['chB'] = chB
-
-        writeRow(outputFileHandle, sample, chA, chB)
-
+        pollAverageWriteRawImpedance(RECORDING_TIME_S, TIMEOUT_MS, chA, chB)
         readoutSerial.write(IMPEDANCE_DONE_MESSAGE)
 
 
@@ -131,5 +118,4 @@ try:
 finally:
     # ---- always unsubscribe on exit, even if interrupted ----
     daq.unsubscribe(impedanceNode)
-    outputFileHandle.close()
     print("Unsubscribed from impedance node, exiting.")

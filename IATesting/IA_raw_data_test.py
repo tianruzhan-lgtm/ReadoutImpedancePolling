@@ -76,10 +76,8 @@ outputFile = helpers.initializeData(subDirectoryData, fileIDData, headerList)
 
 beginTime_DeviceInternal = (device.status.time()/instrClockPeriod) # Time that we began polling, in seconds, according to internal clock
 
-# List where we will store all our data
 IARawSamples = {key: [] for key in headerList}
-recordedIdx = 0  # tracks how many rows have already been written to file
-#humidityser.write(b"s\n") # This lets the arduino know that we are starting.
+recordedIdx = 0
 
 # Subscribe once, then keep polling continuously without unsubscribing in between
 daq.flush()
@@ -87,11 +85,6 @@ daq.subscribe(impedanceNode)
 daq.sync()
 
 def recordAllRawData(outputFile, IAAvgData, headerList, startIdx=0):
-    """
-    Appends every new row (from startIdx to the end of each list) to outputFile.
-    Returns the new startIdx to pass in next call, so already-written rows
-    aren't duplicated.
-    """
     precision = {
         "time": 10,
         "temperature": 4,
