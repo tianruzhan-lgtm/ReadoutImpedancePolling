@@ -1,7 +1,7 @@
 // ---- SYSTEM SETTINGS ----
 
 // time constants (all in microseconds)
-const unsigned long CYCLE_TARGET_TIME = 100000000;
+const unsigned long CYCLE_TARGET_TIME = 2000000;
 const unsigned long TIMEOUT_TIME = 5000000;                                    // need to set
 
 unsigned long cycleStartTime;
@@ -16,7 +16,7 @@ const char* START_MESSAGE = "START";
 
 // ---- READOUT TEENSY SIDE ----
 
-// ---- MUXING FUNCTIONS ---- 
+// ---- MUXING FUNCTIONS ----
 // FYI: bitmask values depend on mux pins
 
 // system settings
@@ -59,7 +59,7 @@ void setupMuxLookupTables() {
   }
 
   for (int channel = 0; channel < NUM_ELECTRODES; channel++) {      // set up bitmask table for mux B
-    uint32_t bitsMuxB6 = 0; 
+    uint32_t bitsMuxB6 = 0;
     if (channel & 0b0001) { bitsMuxB6 |= CORE_PIN21_BITMASK; }
     if (channel & 0b0010) { bitsMuxB6 |= CORE_PIN20_BITMASK; }
     if (channel & 0b0100) { bitsMuxB6 |= CORE_PIN19_BITMASK; }
@@ -69,7 +69,7 @@ void setupMuxLookupTables() {
   }
 
   maskGPIO6 = CORE_PIN14_BITMASK | CORE_PIN15_BITMASK | CORE_PIN16_BITMASK | CORE_PIN17_BITMASK
-              | CORE_PIN18_BITMASK | CORE_PIN19_BITMASK | CORE_PIN20_BITMASK | CORE_PIN21_BITMASK; 
+              | CORE_PIN18_BITMASK | CORE_PIN19_BITMASK | CORE_PIN20_BITMASK | CORE_PIN21_BITMASK;
 
 }
 
@@ -137,7 +137,7 @@ void advanceToNextPair() {
   if (pairIndex >= MAX_PAIRS) {
     pairIndex = 0;
     currentState = PAD_CYCLE;
-  } 
+  }
 
   else {
     currentState = SET_ELECTRODES;
@@ -190,6 +190,7 @@ void updateReadout() {
 // ---- SETUP / LOOP ----
 
 void setup() {
+  delay(1000);
 
   for (uint8_t i = 0; i < NUM_ELECTRODES - 1; i++) {                // set up electrode pairs
     for (uint8_t j = i + 1; j < NUM_ELECTRODES; j++) {
