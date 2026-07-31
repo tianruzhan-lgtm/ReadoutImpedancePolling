@@ -22,12 +22,12 @@ PAIR_INCOMING_MESSAGE = "P,"
 IMPEDANCE_DONE_MESSAGE = b"D\n"
 
 # ---- MFIA polling constants ----
-RECORDING_TIME_S = 0.1
+RECORDING_TIME_S = 0.003
 TIMEOUT_MS = 500
 
 # ---- File destination ----
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
-fileIDData = r"20260729_AutoElectrodeReadout_Test"
+fileIDData = r"20260729_AutoElectrodeReadout_Test1.4"
 
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z"]
@@ -76,20 +76,20 @@ def pollAndAverageImpedance(recordingTimeS, timeoutMs):
     IARawData = daq.poll(recordingTimeS, timeoutMs, 0, True)[impedanceNode]
     daq.unsubscribe("*")
 
-    IAAvgData = {}
+    sample = {}
     for key in headerList_IARaw:
         values = IARawData[key]
         if key == 'timestamp':
-            IAAvgData['time'] = (float(np.mean(values)) / instrClockPeriod) - beginTime_DeviceInternal
+            sample['time'] = (float(np.mean(values)) / instrClockPeriod) - beginTime_DeviceInternal
         if key == 'z':
-            IAAvgData['zmag'] = np.mean(np.abs(values))
-            IAAvgData['zphase'] = np.mean(np.angle(values))
-            IAAvgData['zreal'] = np.mean(np.real(values))
-            IAAvgData['zimag'] = np.mean(np.imag(values))
+            sample['zmag'] = np.mean(np.abs(values))
+            sample['zphase'] = np.mean(np.angle(values))
+            sample['zreal'] = np.mean(np.real(values))
+            sample['zimag'] = np.mean(np.imag(values))
         # if key == 'frequency':
-            # IAAvgData['frequency'] = np.mean(values)
+            # sample['frequency'] = np.mean(values)
 
-    return IAAvgData
+    return sample
 
 
 def runElectrodeSweep():
@@ -107,13 +107,15 @@ def runElectrodeSweep():
             continue
         chA, chB = int(messageParts[1]), int(messageParts[2])
 
-        IAAvgData = pollAndAverageImpedance(RECORDING_TIME_S, TIMEOUT_MS)
-        IAAvgData['chA'] = chA
-        IAAvgData['chB'] = chB
+        sample = pollAndAverageImpedance(RECORDING_TIME_S, TIMEOUT_MS)
+        sample['chA'] = chA
+        sample['chB'] = chB
 
-        print(f"chA={chA}, chB={chB},  zreal={IAAvgData['zreal']:.2e}")
+        print(f"chA={chA}, chB={chB},  zreal={sample['zreal']:.2e}")
 
-        helpers.recordData(outputFile, IAAvgData, headerList)
+        wrappedSample = {key: [sample[key]] for key in headerList}
+        print(wrappedSample)
+        helpers.recordData(outputFile, wrappedSample, headerList)
 
         readoutSerial.write(IMPEDANCE_DONE_MESSAGE)
 
