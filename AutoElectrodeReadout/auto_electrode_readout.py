@@ -22,7 +22,7 @@ PAIR_INCOMING_MESSAGE = "P,"
 IMPEDANCE_DONE_MESSAGE = b"D\n"
 
 # ---- MFIA polling constants ----
-RECORDING_TIME_S = 0.003
+RECORDING_TIME_S = 0.01
 TIMEOUT_MS = 500
 
 # ---- File destination ----
@@ -71,8 +71,6 @@ beginTime_DeviceInternal = (device.status.time() / instrClockPeriod)
 
 def pollAndAverageImpedance(recordingTimeS, timeoutMs):
     daq.flush()
-    daq.subscribe(impedanceNode)
-    daq.sync()
     IARawData = daq.poll(recordingTimeS, timeoutMs, 0, True)[impedanceNode]
     daq.unsubscribe("*")
 
@@ -119,7 +117,21 @@ def runElectrodeSweep():
 
         readoutSerial.write(IMPEDANCE_DONE_MESSAGE)
 
+
+# ---- sweep ----
 input("Press Enter to start the electrode sweep...")
 readoutSerial.write(b"START\n")
 
+daq.subscribe(impedanceNode)    # subscribe once, turn off at end
+daq.sync()
+
 runElectrodeSweep()
+
+readoutSerial.write(b"START\n")
+
+try:
+    runElectrodeSweep()
+finally:
+    # ---- always unsubscribe on exit, even if interrupted ----
+    daq.unsubscribe(impedanceNode)
+    print("Unsubscribed from impedance node, exiting.")
