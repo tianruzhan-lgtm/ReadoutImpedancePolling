@@ -22,12 +22,12 @@ PAIR_INCOMING_MESSAGE = "P,"
 IMPEDANCE_DONE_MESSAGE = b"D\n"
 
 # ---- MFIA polling constants ----
-RECORDING_TIME_S = 0.01
+RECORDING_TIME_S = 0.003
 TIMEOUT_MS = 500
 
 # ---- File destination ----
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
-fileIDData = r"20260729_AutoElectrodeReadout_Test1.5"
+fileIDData = r"20260729_AutoElectrodeReadout_Test1.6"
 
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z"]
@@ -114,8 +114,6 @@ def runElectrodeSweep():
         sample = pollAndAverageImpedance(RECORDING_TIME_S, TIMEOUT_MS)
         sample['chA'] = chA
         sample['chB'] = chB
-
-        print(f"chA={chA}, chB={chB},  zreal={sample['zreal']:.2e}")
 
         writeRow(outputFileHandle, sample, chA, chB)
 
