@@ -27,7 +27,7 @@ TIMEOUT_MS = 500
 
 # ---- File destination ----
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
-fileIDData = r"20260729_AutoElectrodeReadout_Test1.4"
+fileIDData = r"20260729_AutoElectrodeReadout_Test1.5"
 
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z"]
@@ -72,7 +72,6 @@ beginTime_DeviceInternal = (device.status.time() / instrClockPeriod)
 def pollAndAverageImpedance(recordingTimeS, timeoutMs):
     daq.flush()
     IARawData = daq.poll(recordingTimeS, timeoutMs, 0, True)[impedanceNode]
-    daq.unsubscribe("*")
 
     sample = {}
     for key in headerList_IARaw:
@@ -124,10 +123,6 @@ readoutSerial.write(b"START\n")
 
 daq.subscribe(impedanceNode)    # subscribe once, turn off at end
 daq.sync()
-
-runElectrodeSweep()
-
-readoutSerial.write(b"START\n")
 
 try:
     runElectrodeSweep()
