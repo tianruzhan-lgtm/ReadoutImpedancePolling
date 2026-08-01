@@ -28,7 +28,7 @@ NUM_SWEEPS_DESIRED = 5
 
 # ---- File destination ----
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
-fileIDData = r"20260729_AutoElectrodeReadout_Test1.6"
+fileIDData = r"20260731_AutoElectrodeReadoutRaw_Peltier_7_down"
 
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z"]
@@ -70,7 +70,10 @@ time.sleep(1.005)
 beginTime_DeviceInternal = (device.status.time() / instrClockPeriod)
 
 def pollAverageWriteRawImpedance(recordingTimeS, timeoutMs, chA, chB):
+    daq.subscribe(impedanceNode)
+    daq.flush()
     IARawData = daq.poll(recordingTimeS, timeoutMs, 0, True)[impedanceNode]
+    daq.unsubscribe("*")
 
     timestamps = IARawData['timestamp']
     zValues = IARawData['z']
@@ -121,13 +124,13 @@ def runElectrodeSweep():
 input("Press Enter to start the electrode sweep...")
 readoutSerial.write(b"START\n")
 
-daq.subscribe(impedanceNode)    # subscribe once, turn off at end
-daq.sync()
+# daq.subscribe(impedanceNode)    # subscribe once, turn off at end
+# daq.sync()
 sweepCounter = 0
 
 try:
     runElectrodeSweep()
 finally:
     # ---- always unsubscribe on exit, even if interrupted ----
-    daq.unsubscribe(impedanceNode)
+    daq.unsubscribe("*")
     print("Unsubscribed from impedance node, exiting.")
