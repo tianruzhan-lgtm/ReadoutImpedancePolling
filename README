@@ -1,18 +1,2 @@
-1. Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html) if you don't have conda already.
-2. [If applicable] Install Zurich Instruments LabOne: [link]
-3. Clone this repo:
-   git clone https://github.com/you/repo.git
-   cd repo
-4. Create the environment:
-   conda env create -f environment_full.yml
-5. Activate it:
-   conda activate mfia
-6. Run:
-   python TCycle.py
-
-   Note that I have opted to just manually change the driving voltage and freq. on the UI because I have not
-   had time to edit that part of the code yet.
-
-   zhinstExample is code provided by the company.
-
-   My code makes references to a temperature board, that is for driving my own peltier, and is not necessary for you.
+Tara Zhan (Caltech '29) SURF 2026 EIT project repository.
+Contains Teensy code for multiplexing between electrode channels and host code for obtaining impedance data.
