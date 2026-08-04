@@ -29,7 +29,7 @@ NUM_SWEEPS_DESIRED = 5
 
 # ---- File destination ----
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
-fileIDData = r"20260803_debugging_4"
+fileIDData = r"20260803_debugging_6"
 
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z"]
