@@ -6,11 +6,8 @@ import json
 import cmath
 import matplotlib.pyplot as plt
 import time
-import signal
-from TemperatureBoard import TemperatureBoard
 from MFIA import MFIA
 import helpers
-import plotters
 import serial
 
 # ---- Electrode readout settings ----
