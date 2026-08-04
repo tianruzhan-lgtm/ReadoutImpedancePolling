@@ -70,7 +70,7 @@ print(timestamp / instrClockPeriod)
 time.sleep(1.005)
 beginTime_DeviceInternal = (device.status.time() / instrClockPeriod)
 
-def pollAverageWriteRawImpedance(recordingTimeS, timeoutMs, chA, chB):
+def pollWriteRawImpedance(recordingTimeS, timeoutMs, chA, chB):
     #daq.subscribe(impedanceNode)
     daq.sync()
 
@@ -114,7 +114,7 @@ def runElectrodeSweep():
             continue
         chA, chB = int(messageParts[1]), int(messageParts[2])
 
-        pollAverageWriteRawImpedance(RECORDING_TIME_S, TIMEOUT_MS, chA, chB)
+        pollWriteRawImpedance(RECORDING_TIME_S, TIMEOUT_MS, chA, chB)
         readoutSerial.write(IMPEDANCE_DONE_MESSAGE)
 
         if (chA == 14) and (chB == 15):
