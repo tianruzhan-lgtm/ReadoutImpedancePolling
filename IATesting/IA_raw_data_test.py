@@ -12,7 +12,7 @@ import signal
 from TemperatureBoard import TemperatureBoard
 from MFIA import MFIA
 import utils.helpers as helpers
-import plotters
+import utils.plotters as plotters
 import serial
 
 #hboardBaudRate = 38400
