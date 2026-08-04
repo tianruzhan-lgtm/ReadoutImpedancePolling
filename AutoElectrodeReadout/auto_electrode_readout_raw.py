@@ -23,6 +23,7 @@ IMPEDANCE_DONE_MESSAGE = b"D\n"
 
 # ---- MFIA polling constants ----
 RECORDING_TIME_S = 0.01
+MIN_SAMPLES = 80
 TIMEOUT_MS = 500
 NUM_SWEEPS_DESIRED = 5
 
@@ -72,7 +73,12 @@ beginTime_DeviceInternal = (device.status.time() / instrClockPeriod)
 def pollAverageWriteRawImpedance(recordingTimeS, timeoutMs, chA, chB):
     #daq.subscribe(impedanceNode)
     daq.sync()
-    IARawData = daq.pollEvent(timeoutMs)[impedanceNode]
+
+    dataSamplesLength = 0
+    while dataSamplesLength < MIN_SAMPLES:
+        IARawData = daq.pollEvent(timeoutMs)[impedanceNode]
+        dataSamplesLength = len(IARawData['timestamp'])
+
     #daq.unsubscribe("*")
 
     timestamps = IARawData['timestamp']
