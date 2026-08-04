@@ -7,7 +7,7 @@ import cmath
 import matplotlib.pyplot as plt
 import time
 from MFIA import MFIA
-import helpers
+import utils.helpers as helpers
 import serial
 
 # ---- Electrode readout settings ----

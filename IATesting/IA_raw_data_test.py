@@ -11,7 +11,7 @@ import time
 import signal
 from TemperatureBoard import TemperatureBoard
 from MFIA import MFIA
-import helpers
+import utils.helpers as helpers
 import plotters
 import serial
 

@@ -1,2 +1,2 @@
-Tara Zhan (Caltech '29) SURF 2026 EIT project repository.
+Tara Zhan (Caltech '29) EIT project repository for SURF 2026 @ Daraio Lab.
 Contains Teensy code for multiplexing between electrode channels and host code for obtaining impedance data.

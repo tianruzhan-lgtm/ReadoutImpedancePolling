@@ -3,14 +3,10 @@ import numpy as np
 import zhinst
 import zhinst.toolkit
 import json
-import cmath
 import matplotlib.pyplot as plt
 import time
-import signal
-from TemperatureBoard import TemperatureBoard
 from MFIA import MFIA
-import helpers
-import plotters
+import utils.helpers as helpers
 import serial
 
 # ---- Electrode readout settings ----
