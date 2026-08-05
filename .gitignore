@@ -4,3 +4,4 @@ __pycache__/
 venv/
 *.pyo
 .DS_Store
+*.asv
