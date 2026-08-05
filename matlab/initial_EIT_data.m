@@ -64,3 +64,8 @@ for n = 1:5
     sweeps{n,5} = table(chA, chB, raw_lpass);
 end
 
+%%
+headers = {'raw_data', 'samples_per_channel', 'Z_avg', 'Z_avg_lowpass', 'raw_filtered_lowpass'};
+rows = {'sweep1', 'sweep2', 'sweep3', 'sweep4', 'sweep5'};
+
+sweepsData = cell2table(sweeps, "RowNames", rows, "VariableNames", headers);
