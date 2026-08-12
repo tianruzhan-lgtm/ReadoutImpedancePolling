@@ -47,9 +47,9 @@ function Exp = importExperiment(folderPath)
                     'positionY', {}, 'positionZ', {}, 'data', {}, ...
                     'filename', {});
     sampleInfoList = struct('SampleNumber', {}, 'Date', {}, 'Description', {});
-
     for i = 1:nTrials
         fpath = fullfile(files(i).folder, files(i).name);
+        opts = detectImportOptions(fpath, 'FileType', 'text', 'Delimiter', '\t', 'CommentStyle', '%');
         [headerMap, nHeaderLines] = parseHeader(fpath);
 
         sampleInfoList(i).SampleNumber = getField(headerMap, 'Sample Number');
@@ -63,8 +63,7 @@ function Exp = importExperiment(folderPath)
         trial(i).positionZ   = str2double(getField(headerMap, 'Position_Z'));
         trial(i).filename    = files(i).name;
 
-        trial(i).data = readtable(fpath, 'FileType', 'text', ...
-            'Delimiter', '\t', 'NumHeaderLines', nHeaderLines);
+        trial(i).data = readtable(fpath, opts);
 
         % flag filename/header Type mismatch, don't error
         lowerName = lower(files(i).name);
