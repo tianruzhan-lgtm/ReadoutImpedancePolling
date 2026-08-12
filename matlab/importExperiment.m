@@ -10,6 +10,8 @@ function Exp = importExperiment(folderPath)
 %                    starting with a "% Key: Value" header block as
 %                    produced by the AutoTempData script)
 %
+%       files are located in the Box, Off-center data is in good_data
+%
 %   OUTPUT:
 %       Exp.sampleinfo          -  struct with fields SampleNumber, Date,
 %                                  Description (taken from Trial 1, checked
@@ -18,7 +20,7 @@ function Exp = importExperiment(folderPath)
 %       Exp.trial(i).temperature - peltier plate temperature. Numeric
 %                                  (double) if the header value parses as
 %                                  a number, otherwise kept as the raw
-%                                  string (e.g. 'off', 'ambient'). Blank
+%                                  string (e.g. voltage values). Blank
 %                                  header fields come through as NaN.
 %       Exp.trial(i).positionX/positionY/positionZ - position (double)
 %       Exp.trial(i).data         - table of the raw recorded data
