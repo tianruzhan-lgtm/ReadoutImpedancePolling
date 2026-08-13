@@ -26,12 +26,57 @@ NUM_SWEEPS_DESIRED = 5
 
 # ---- File destination ----
 subDirectoryData = r"C:\Users\Daraio Lab\Documents\Data\Brian\EIT"
-fileIDData = r"20260806_AutoTempData_offcenter_8_heat"
+fileIDData = r"20260812_Exp1_PID_10"
+
+# ---- MATLAB header metadata (fill these in per trial) ----
+SAMPLE_NUMBER = "1"
+DATE = "0812"
+DESCRIPTION = "varied locations, increasing heat"        # e.g. "off-center electrode sweep, heat ramp"
+TEMPERATURE = "20"
+POSITION_X = "0.005"
+POSITION_Y = "-0.03"
+POSITION_Z = "0"
+TYPE = "heat"               # "control" or "heat"
 
 # ---- Output file setup ----
 headerList_IARaw = ["timestamp", "z"]
 headerList = ["time", "zreal", "zimag", "zmag", "zphase", "chA", "chB"]
 outputFile = helpers.initializeData(subDirectoryData, fileIDData, headerList)
+
+
+def prependHeaderBlock(filePath, sampleNumber, date, description,
+                        temperature, positionX, positionY, positionZ, type_):
+    """
+    Reads the file at filePath (at this point it should contain only the
+    column header row written by initializeData) and rewrites it with a
+    "% Key: Value" metadata block inserted above that row. Must be called
+    before any data rows are appended via recordData, since it reads and
+    fully rewrites the file's current contents.
+    """
+    with open(filePath, 'r') as f:
+        existingContent = f.read()
+
+    headerBlockLines = [
+        "% ===================== TRIAL HEADER =====================",
+        f"% Sample Number: {sampleNumber}",
+        f"% Date: {date}",
+        f"% Description: {description}",
+        f"% Temperature: {temperature}",
+        f"% Position_X: {positionX}",
+        f"% Position_Y: {positionY}",
+        f"% Position_Z: {positionZ}",
+        f"% Type: {type_}",
+        "% ===========================================================",
+    ]
+    headerBlock = "\n".join(headerBlockLines) + "\n"
+
+    with open(filePath, 'w') as f:
+        f.write(headerBlock)
+        f.write(existingContent)
+
+
+prependHeaderBlock(outputFile, SAMPLE_NUMBER, DATE, DESCRIPTION,
+                    TEMPERATURE, POSITION_X, POSITION_Y, POSITION_Z, TYPE)
 
 # ---- MFIA measurement constants ----
 deviceID = 'dev3275'
